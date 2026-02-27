@@ -16,8 +16,6 @@ services:
       - "5900:5900"           # VNC access
       - "9222:9222"           # Chromium remote debugging
     environment:
-      - TARGET_URL="wocabee.app"
-    volumes:
-      - ./data:/bot     # optional helper data
+      - TARGET_URL="wocabee.app/app"
     tty: true
     stdin_open: true

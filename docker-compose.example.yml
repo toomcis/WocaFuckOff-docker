@@ -1,6 +1,7 @@
 # Example docker-compose configuration for the bot service
 # Build the image from the local Dockerfile and pass through
 # some of the environment variables declared in the Dockerfile.
+# Code also doesn't need any mounted volumes, everything works dynamically through volumes
 #
 # Usage:
 #   docker-compose up --build
@@ -16,7 +17,6 @@ services:
       - "5900:5900"           # VNC access
       - "9222:9222"           # Chromium remote debugging
     environment:
-      - BOT_DEBUG=true
       - TARGET_URL=${TARGET_URL}
       - WORDLIST_FILE=${WORDLIST_FILE}
       - PICTURE_FILE=${PICTURE_FILE}
@@ -24,7 +24,5 @@ services:
       - NTFY_SERVER=${NTFY_SERVER}
       - NTFY_TOPIC=${NTFY_TOPIC}
       - NTFY_TOKEN=${NTFY_TOKEN}
-    volumes:
-      - ./data:/bot
     tty: true
     stdin_open: true
