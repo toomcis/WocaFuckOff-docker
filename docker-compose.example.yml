@@ -10,14 +10,21 @@ version: "3.8"
 services:
   wocabee:
     build: .
-    container_name: wocafuckoff
+    container_name: wocabee_bot
     restart: unless-stopped
     ports:
       - "5900:5900"           # VNC access
       - "9222:9222"           # Chromium remote debugging
     environment:
-      - TARGET_URL="wocabee.app"
+      - BOT_DEBUG=true
+      - TARGET_URL=${TARGET_URL}
+      - WORDLIST_FILE=${WORDLIST_FILE}
+      - PICTURE_FILE=${PICTURE_FILE}
+      - PLACEHOLDER_WORDS=${PLACEHOLDER_WORDS}
+      - NTFY_SERVER=${NTFY_SERVER}
+      - NTFY_TOPIC=${NTFY_TOPIC}
+      - NTFY_TOKEN=${NTFY_TOKEN}
     volumes:
-      - ./data:/bot     # optional helper data
+      - ./data:/bot
     tty: true
     stdin_open: true
