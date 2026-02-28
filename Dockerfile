@@ -3,7 +3,6 @@ FROM ubuntu:24.04
 
 # Install Dependencies
 RUN apt-get update && apt-get install -y \
-    chromium \
     xvfb \
     x11vnc \
     fluxbox \
@@ -21,20 +20,25 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /bot
 
-# Python Dependencies
-RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-RUN git clone https://github.com/toomcis/WocaFuckOff.git /bot && \
-    pip install -r /bot/requirements.txt && \
+RUN python3 -m venv /opt/venv && \
+    git clone https://github.com/toomcis/WocaFuckOff.git . && \
+    pip install -r requirements.txt && \
     playwright install chromium
 
 # Environment Variables
-ENV DISPLAY=:99
 ENV TARGET_URL=
 ENV WORDLIST_FILE=
 ENV PICTURE_FILE=
 ENV PLACEHOLDER_WORDS=
+ENV USERNAME=
+ENV PASSWORD=
+ENV DOUBLE_POINTS=false
+ENV ADDON_POINTS=5000
+ENV MILESTONE_REMINDER=1000
+ENV CLASS_INDEX=0
+ENV PACKAGE_INDEX=0
 ENV NTFY_SERVER=
 ENV NTFY_TOPIC=
 ENV NTFY_TOKEN=
@@ -54,4 +58,4 @@ CMD bash -c "\
     x11vnc -display :99 -forever -nopw & \
     sleep 3 && \
     chromium --no-sandbox --remote-debugging-port=9222 & \
-    python3 /bot/solver.py"
+    python3 /bot/startup.py"

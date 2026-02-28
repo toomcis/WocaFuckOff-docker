@@ -15,14 +15,20 @@ services:
     restart: unless-stopped
     ports:
       - "5900:5900"           # VNC access
-      - "9222:9222"           # Chromium remote debugging
     environment:
-      - TARGET_URL=${TARGET_URL}
-      - WORDLIST_FILE=${WORDLIST_FILE}
-      - PICTURE_FILE=${PICTURE_FILE}
-      - PLACEHOLDER_WORDS=${PLACEHOLDER_WORDS}
-      - NTFY_SERVER=${NTFY_SERVER}
-      - NTFY_TOPIC=${NTFY_TOPIC}
-      - NTFY_TOKEN=${NTFY_TOKEN}
+      - TARGET_URL=${TARGET_URL} # Targeting URL for bot to interact, dont change unless you know what you are doing
+      - WORDLIST_FILE=${WORDLIST_FILE} # Path to wordlist file, doesn't need mounting, optional
+      - PICTURE_FILE=${PICTURE_FILE} # Path to picture file, doesn't need mounting, optional
+      - PLACEHOLDER_WORDS=${PLACEHOLDER_WORDS} # Comma separated list of placeholder words to ignore, optional
+      - CLASS_INDEX=${CLASS_INDEX} # Class index to target, default is 0 for first class, optional
+      - PACKAGE_INDEX=${PACKAGE_INDEX} # Package index to target, default is 0 for first package, optional
+      - USERNAME=${USERNAME} # Username for login into Wocabee
+      - PASSWORD=${PASSWORD} # Password for login into Wocabee
+      - DOUBLE_POINTS=${DOUBLE_POINTS} # Set to true to enable double points mode, default is false for normal more, optional
+      - ADDON_POINTS=${ADDON_POINTS} # Number of addon points to use, default is 5000
+      - MILESTONE_REMINDER=${MILESTONE_REMINDER} # Number of points to trigger milestone reminder, default is 1000, optional
+      - NTFY_SERVER=${NTFY_SERVER} # NTFY server URL for notifications, optional
+      - NTFY_TOPIC=${NTFY_TOPIC} # NTFY topic for notifications, optional
+      - NTFY_TOKEN=${NTFY_TOKEN} # NTFY token for authentication, optional
     tty: true
     stdin_open: true
