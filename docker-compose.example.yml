@@ -4,17 +4,18 @@
 # Code also doesn't need any mounted volumes, everything works dynamically through volumes
 #
 # Usage:
-#   docker-compose up --build
+#   docker-compose up --build to build it manually
+#   docker-compose up to just use it as it is
 #
-version: "3.8"
-
 services:
   wocabee:
-    build: .
-    container_name: wocabee_bot
-    restart: unless-stopped
-    ports:
-      - "5900:5900"           # VNC access
+    build:
+      context: .
+      dockerfile: Dockerfile
+      network: host
+    image: ghcr.io/toomcis/wocafuckoff-docker:latest  # Image path
+    container_name: wocafuckoff
+    restart: "no"
     environment:
       - TARGET_URL=${TARGET_URL} # Targeting URL for bot to interact, dont change unless you know what you are doing
       - WORDLIST_FILE=${WORDLIST_FILE} # Path to wordlist file, doesn't need mounting, optional
@@ -32,3 +33,4 @@ services:
       - NTFY_TOKEN=${NTFY_TOKEN} # NTFY token for authentication, optional
     tty: true
     stdin_open: true
+    network_mode: "host"

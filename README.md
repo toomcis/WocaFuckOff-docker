@@ -1,137 +1,153 @@
-# Wocabee Bot Docker ! NOT YET WORKING !
+# WocaFuckOff Docker
 
 ![logo](assets/logo.png)
 
 **Project Overview**
 
-- **Purpose:** Dockerized version of the Wocabee Bot for easy deployment without manual Chromium setup.
-- **Main components:** Docker image with Chromium, VNC server, and the bot automation script.
-- **Primary language focus:** Slovak (designed for Slovak → English), but the approach is language-agnostic in principle.
+* **Purpose:** Fully containerized deployment of the WocaFuckOff Wocabee automation bot with Playwright and bundled browser dependencies.
+* **Main components:** Ubuntu-based Docker image, Python virtual environment, Playwright (Chromium), and the WocaFuckOff automation scripts.
+* **Primary language focus:** Slovak → English by default, but fully configurable for other language pairs supported by the target platform.
 
 **Quick Notes**
 
-- **AI-assisted:** This project was created with AI help and may contain bugs or imperfect heuristics. Don't be scared of making an [issue](https://github.com/toomcis/WocaFuckOff/issues) and reporting any bugs or imperfections!
-- **VNC enabled:** Access the running container's desktop via VNC on port 5900 for visual monitoring.
+* **AI-assisted:** Parts of this project were created with AI assistance. If you encounter unexpected behavior, open an issue: [issue](https://github.com/toomcis/WocaFuckOff-docker/issues) ! NOTE: If you encounter an issue with the script itself, please make a bug report under the original [WocaFuckOff project here](https://github.com/toomcis/WocaFuckOff/issues) !
+* **Playwright-powered:** Uses Playwright with an installed Chromium build inside the container.
+* **Notification support:** Optional integration with ntfy for runtime and startup error notifications.
 
-**Requirements**
+---
 
-- **Docker & Docker Compose:** Ensure both are installed on your system.
-- **Docker image:** Build locally or pull from registry.
+## Requirements
 
-**Configuration**
+* **Docker**
+* **Docker Compose** (recommended for easier configuration)
+* A valid Wocabee account
 
-Configure the bot via environment variables in `docker-compose.yml`:
+---
 
-```yaml
-environment:
-  BOT_DEBUG: "true"
-  NTFY_SERVER: "https://ntfy.sh"
-  NTFY_TOPIC: "wocabee-bot"
-  NTFY_TOKEN: ""
-  TARGET_URL: "https://wocabee.app/"
-  WORDLIST_FILE: "/bot/wordlist.json"
-  PICTURE_FILE: "/bot/picturelist.json"
-  PLACEHOLDER_WORDS: "translate,check"
+## Usage
+
+### Build & Run with Docker Compose
+
+## Running without building
+
+- This is the preferred way of using this docker image
+- Be sure to setup the variables correctly, by default it will farm ~5000 points which might not be the desired setup, please change `ADDON_POINTS` enviromental variable if you want this to be different
+- Another thing to watch out for it selecting the proper class and package using `CLASS_INDEX` and `PACKAGE_INDEX`
+- Username and Password are required to work, otherwise it will just autoclose  
+
+```yml
+services:
+  wocabee:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      network: host
+    image: ghcr.io/toomcis/wocafuckoff-docker:latest  # Image path
+    container_name: wocafuckoff
+    restart: "no"
+    environment:
+      - TARGET_URL=${TARGET_URL} # Targeting URL for bot to interact, dont change unless you know what you are doing
+      - WORDLIST_FILE=${WORDLIST_FILE} # Path to wordlist file, doesn't need mounting, optional
+      - PICTURE_FILE=${PICTURE_FILE} # Path to picture file, doesn't need mounting, optional
+      - PLACEHOLDER_WORDS=${PLACEHOLDER_WORDS} # Comma separated list of placeholder words to ignore, optional
+      - CLASS_INDEX=${CLASS_INDEX} # Class index to target, default is 0 for first class, optional
+      - PACKAGE_INDEX=${PACKAGE_INDEX} # Package index to target, default is 0 for first package, optional
+      - USERNAME=${USERNAME} # Username for login into Wocabee
+      - PASSWORD=${PASSWORD} # Password for login into Wocabee
+      - DOUBLE_POINTS=${DOUBLE_POINTS} # Set to true to enable double points mode, default is false for normal more, optional
+      - ADDON_POINTS=${ADDON_POINTS} # Number of addon points to use, default is 5000
+      - MILESTONE_REMINDER=${MILESTONE_REMINDER} # Number of points to trigger milestone reminder, default is 1000, optional
+      - NTFY_SERVER=${NTFY_SERVER} # NTFY server URL for notifications, optional
+      - NTFY_TOPIC=${NTFY_TOPIC} # NTFY topic for notifications, optional
+      - NTFY_TOKEN=${NTFY_TOKEN} # NTFY token for authentication, optional
+    tty: true
+    stdin_open: true
+    network_mode: "host"
 ```
 
-Alternatively, edit the Dockerfile's `ENV` section directly.
+- After that you can simply do `docker-compose up` and it will farm the points!
 
-**Usage**
+## Building manually
 
-**Build & Run with Docker Compose**
+- If you wish to build this image manually, you can use the same docker-compose.yml file mentioned above, or just do
 
 ```bash
-# Navigate to the docker directory
-cd WocaFuckOff-docker
+# Grab the repository
+git clone https://github.com/toomcis/WocaFuckOff-docker.git
 
-# Start the container
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop the container
-docker-compose down
+# Run container (Using the above compose file)
+docker-compose up --build
 ```
 
-**Build Manually**
+---
+
+## How It Works
+
+* The container is based on **Ubuntu 24.04**.
+* A Python virtual environment is created at `/opt/venv`.
+* The WocaFuckOff repository is cloned into `/bot`.
+* Playwright installs all required browser dependencies and a bundled Chromium build. (This is the reason the image is ~1.2GB in size)
+* On startup, the container runs:
 
 ```bash
-# Build the image
-docker build -t wocabee-bot .
-
-# Run with environment variables
-docker run -d \
-  -e NTFY_TOPIC=wocabee-bot \
-  -e TARGET_URL=https://wocabee.app/ \
-  -p 5900:5900 \
-  -p 9222:9222 \
-  wocabee-bot
+/opt/venv/bin/python /bot/startup.py
 ```
 
-**Access via VNC**
+* The bot:
 
-Once the container is running, connect to the VNC server:
+  * Creates a Chromium instance and connects playwright to it
+  * Navigates to `TARGET_URL`.
+  * Handles exercises automatically (translate, choose word, pexeso, complete word, picture tasks, etc.).
+  * Updates word and picture mappings dynamically. (not actually tested, if you find it doesn't work, please report it in the [issues](https://github.com/toomcis/WocaFuckOff-docker/issues))
+  * Sends ntfy notifications on runtime/startup errors (if configured).
 
-```bash
-# Using vncviewer (Linux/macOS)
-vncviewer localhost:5900
+---
 
-# Or use any VNC client and connect to localhost:5900
-```
+## Environment Variables Reference
 
-No password is required by default.
+| Variable             | Default                   | Description                      | Optionable                                            |
+| -------------------- | ------------------------- | -------------------------------- |-------------------------------------------------------|
+| `TARGET_URL`         | `https://wocabee.app/app` | Target Wocabee URL               | ✅ ! Dont change unless you know what you are doing ! |
+| `WORDLIST_FILE`      | `wordlist.json`           | JSON file storing word mappings  | ✅ ! Dont change unless you know what you are doing ! |
+| `PICTURE_FILE`       | `picturelist.json`        | JSON file storing image mappings | ✅ ! Dont change unless you know what you are doing ! |
+| `PLACEHOLDER_WORDS`  | `translate,check`         | Words to ignore                  | ✅ ! Dont change unless you know what you are doing ! |
+| `USERNAME`           | (empty)                   | Login username                   | ❎                                                    |
+| `PASSWORD`           | (empty)                   | Login password                   | ❎                                                    |
+| `DOUBLE_POINTS`      | `false`                   | Enable double points mode        | ✅                                                    |
+| `ADDON_POINTS`       | `5000`                    | Target addon points              | ✅                                                    |
+| `MILESTONE_REMINDER` | `1000`                    | Reminder interval                | ✅                                                    |
+| `CLASS_INDEX`        | `0`                       | Class selection index            | ✅                                                    |
+| `PACKAGE_INDEX`      | `0`                       | Package selection index          | ✅                                                    |
+| `NTFY_SERVER`        | (empty)                   | ntfy server URL                  | ✅                                                    |
+| `NTFY_TOPIC`         | (empty)                   | ntfy topic                       | ✅                                                    |
+| `NTFY_TOKEN`         | (empty)                   | ntfy auth token                  | ✅                                                    |
 
-**Ports**
+---
 
-- **5900** — VNC server (visual desktop access)
-- **9222** — Chromium remote debugging port (CDP)
+## Troubleshooting
 
-**How it works**
+* **Container exits immediately**
 
-- The Docker image starts an X server (Xvfb) for headless display.
-- Chromium runs with remote debugging enabled on port 9222.
-- The Wocabee Bot connects to Chromium via CDP and automates the learning tasks.
-- VNC server allows you to monitor the bot's activity in real-time.
+  * Check logs: `docker-compose logs`
+  * Verify required environment variables.
 
-**Volumes & Persistence**
+* **Browser does not start**
 
-To persist word/picture mappings between runs, mount a volume:
+  * Ensure Playwright installed correctly during build.
+  * Rebuild the image with `--no-cache`.
 
-```yaml
-volumes:
-  - ./data:/bot/data
-```
+* **Bot not attaching via CDP**
 
-Then adjust `WORDLIST_FILE` and `PICTURE_FILE` to point to `/bot/data/wordlist.json` and `/bot/data/picturelist.json`.
+  * Make sure remote debugging is enabled on the external browser.
+  * Otherwise the bot will launch its own instance automatically.
 
-**Environment Variables Reference**
+* **Mappings not saved**
 
-| Variable              | Default                   | Description                       |
-| --------------------- | ------------------------- | --------------------------------- |
-| `BOT_DEBUG`         | `true`                  | Enable debug output               |
-| `NTFY_SERVER`       | (empty)                   | Ntfy server URL for notifications |
-| `NTFY_TOPIC`        | (empty)                   | Ntfy topic for notifications      |
-| `NTFY_TOKEN`        | (empty)                   | Ntfy authentication token         |
-| `TARGET_URL`        | `https://wocabee.app/`  | Target site URL                   |
-| `WORDLIST_FILE`     | `/bot/wordlist.json`    | Path to word mappings             |
-| `PICTURE_FILE`      | `/bot/picturelist.json` | Path to picture mappings          |
-| `PLACEHOLDER_WORDS` | `translate,check`       | Words to skip                     |
-| `DISPLAY`           | `:99`                   | X display number                  |
+  * Confirm volume mounting is configured correctly.
+  * Ensure file paths match `WORDLIST_FILE` and `PICTURE_FILE`.
 
-**Troubleshooting**
+---
 
-- **Container won't start:** Check Docker logs with `docker-compose logs`.
-- **VNC connection refused:** Ensure port 5900 is not blocked and the container is running.
-- **Bot not connecting to site:** Verify `TARGET_URL` and `NTFY_SERVER`/`NTFY_TOPIC` settings.
-- **Slow performance:** Adjust Xvfb screen resolution in the Dockerfile's startup command.
+## License & Attribution
 
-**Extending**
-
-- Modify `DockerFile` to add dependencies or customize the environment.
-- Override environment variables in `docker-compose.yml` for different deployments.
-- Mount additional volumes for custom wordlists or configuration files.
-
-**License & Attribution**
-
-- This project uses the [MIT license](../LICENSE)
+* Licensed under the [MIT license](../LICENSE)
