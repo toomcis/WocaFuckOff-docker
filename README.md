@@ -4,23 +4,23 @@
 
 **Project Overview**
 
-* **Purpose:** Fully containerized deployment of the WocaFuckOff Wocabee automation bot with Playwright and bundled browser dependencies.
-* **Main components:** Ubuntu-based Docker image, Python virtual environment, Playwright (Chromium), and the WocaFuckOff automation scripts.
-* **Primary language focus:** Slovak → English by default, but fully configurable for other language pairs supported by the target platform.
+- **Purpose:** Fully containerized deployment of the WocaFuckOff Wocabee automation bot with Playwright and bundled browser dependencies.
+- **Main components:** Ubuntu-based Docker image, Python virtual environment, Playwright (Chromium), and the WocaFuckOff automation scripts.
+- **Primary language focus:** Slovak → English by default, but fully configurable for other language pairs supported by the target platform.
 
 **Quick Notes**
 
-* **AI-assisted:** Parts of this project were created with AI assistance. If you encounter unexpected behavior, open an issue: [issue](https://github.com/toomcis/WocaFuckOff-docker/issues) ! NOTE: If you encounter an issue with the script itself, please make a bug report under the original [WocaFuckOff project here](https://github.com/toomcis/WocaFuckOff/issues) !
-* **Playwright-powered:** Uses Playwright with an installed Chromium build inside the container.
-* **Notification support:** Optional integration with ntfy for runtime and startup error notifications.
+- **AI-assisted:** Parts of this project were created with AI assistance. If you encounter unexpected behavior, open an issue: [issue](https://github.com/toomcis/WocaFuckOff-docker/issues) ! NOTE: If you encounter an issue with the script itself, please make a bug report under the original [WocaFuckOff project here](https://github.com/toomcis/WocaFuckOff/issues) !
+- **Playwright-powered:** Uses Playwright with an installed Chromium build inside the container.
+- **Notification support:** Optional integration with ntfy for runtime and startup error notifications.
 
 ---
 
 ## Requirements
 
-* **Docker**
-* **Docker Compose** (recommended for easier configuration)
-* A valid Wocabee account
+- **Docker**
+- **Docker Compose** (recommended for easier configuration)
+- **WocaBee:** Please make sure that you have a valid WocaBee account and the package already completed before you farm it, the script is supposed to do the tedious grind currently
 
 ---
 
@@ -30,7 +30,7 @@
 
 ## Running without building
 
-- This is the preferred way of using this docker image
+- This is the proper and preffered way of using this docker image
 - Be sure to setup the variables correctly, by default it will farm ~5000 points which might not be the desired setup, please change `ADDON_POINTS` enviromental variable if you want this to be different
 - Another thing to watch out for it selecting the proper class and package using `CLASS_INDEX` and `PACKAGE_INDEX`
 - Username and Password are required to work, otherwise it will just autoclose  
@@ -75,6 +75,8 @@ services:
 # Grab the repository
 git clone https://github.com/toomcis/WocaFuckOff-docker.git
 
+# Edit the docker-compose.example.yml file to match your needs
+
 # Run container (Using the above compose file)
 docker-compose up --build
 ```
@@ -83,23 +85,22 @@ docker-compose up --build
 
 ## How It Works
 
-* The container is based on **Ubuntu 24.04**.
-* A Python virtual environment is created at `/opt/venv`.
-* The WocaFuckOff repository is cloned into `/bot`.
-* Playwright installs all required browser dependencies and a bundled Chromium build. (This is the reason the image is ~1.2GB in size)
-* On startup, the container runs:
+- The container is based on **Ubuntu 24.04**.
+- A Python virtual environment is created at `/opt/venv`.
+- The WocaFuckOff repository is cloned into `/bot`.
+- Playwright installs all required browser dependencies and a bundled Chromium build. (This is the reason the image is ~1.2GB in size)
+- On startup, the container runs:
 
 ```bash
 /opt/venv/bin/python /bot/startup.py
 ```
 
-* The bot:
+- The bot:
 
-  * Creates a Chromium instance and connects playwright to it
-  * Navigates to `TARGET_URL`.
-  * Handles exercises automatically (translate, choose word, pexeso, complete word, picture tasks, etc.).
-  * Updates word and picture mappings dynamically. (not actually tested, if you find it doesn't work, please report it in the [issues](https://github.com/toomcis/WocaFuckOff-docker/issues))
-  * Sends ntfy notifications on runtime/startup errors (if configured).
+  - Creates a Headless Chromium instance and connects playwright to it
+  - Navigates to `TARGET_URL`.
+  - Handles exercises automatically (translate, choose word, pexeso, complete word, picture tasks, etc.).
+  - Sends ntfy notifications on runtime/startup errors (if configured).
 
 ---
 
@@ -126,25 +127,25 @@ docker-compose up --build
 
 ## Troubleshooting
 
-* **Container exits immediately**
+- **Container exits immediately**
 
-  * Check logs: `docker-compose logs`
-  * Verify required environment variables.
+  - Check logs: `docker-compose logs`
+  - Verify required environment variables.
 
-* **Browser does not start**
+- **Browser does not start**
 
-  * Ensure Playwright installed correctly during build.
-  * Rebuild the image with `--no-cache`.
+  - Ensure Playwright installed correctly during build.
+  - Rebuild the image with `--no-cache`.
 
-* **Bot not attaching via CDP**
+- **Bot not attaching via CDP**
 
-  * Make sure remote debugging is enabled on the external browser.
-  * Otherwise the bot will launch its own instance automatically.
+  - Make sure remote debugging is enabled on the external browser.
+  - Otherwise the bot will launch its own instance automatically.
 
-* **Mappings not saved**
+- **Mappings not saved**
 
-  * Confirm volume mounting is configured correctly.
-  * Ensure file paths match `WORDLIST_FILE` and `PICTURE_FILE`.
+  - Confirm volume mounting is configured correctly.
+  - Ensure file paths match `WORDLIST_FILE` and `PICTURE_FILE`.
 
 ---
 
