@@ -58,9 +58,11 @@ RUN python3 -m venv /opt/venv
 # Add venv python to PATH
 ENV PATH="/opt/venv/bin:$PATH"
 
+ARG CACHE_BUST=1
+RUN git clone https://github.com/toomcis/WocaFuckOff.git /bot
+
 # Install Python deps & Playwright
 RUN pip install --upgrade pip && \
-    git clone https://github.com/toomcis/WocaFuckOff.git /bot && \
     pip install -r /bot/requirements.txt && \
     python -m playwright install-deps && \
     python -m playwright install
@@ -84,9 +86,6 @@ ENV NTFY_TOKEN=
 # Entrypoint
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-
-# Force public DNS for headless networking
-RUN echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" > /etc/resolv.conf
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/opt/venv/bin/python", "/bot/startup.py"]

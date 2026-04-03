@@ -13,7 +13,7 @@ services:
       context: .
       dockerfile: Dockerfile
       network: host
-    image: ghcr.io/toomcis/wocafuckoff-docker:latest  # Image path
+    image: ghcr.io/toomcis/wocafuckoff:latest  # Image path
     container_name: wocafuckoff
     restart: "no"
     environment:
